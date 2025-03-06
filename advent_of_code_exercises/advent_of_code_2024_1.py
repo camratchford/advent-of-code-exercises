@@ -37,7 +37,7 @@ def split_by_space(string: str):
 def load_example_data(file: Path) -> str:
     with open(str(file), "r") as example_file:
         example_data = example_file.read()
-        return list(map(split_by_space, example_data.split("\n")))
+        return list(map(split_by_space, example_data.splitlines()))
 
 
 def sort_zip(unsorted_zip: ZippedList) -> (list[int], list[int]):
