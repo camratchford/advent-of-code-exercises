@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 packages = ["advent_of_code_exercises"]
 
 [project]
-name = 'advent_of_code_exercises'
+name = 'advent-of-code-exercises'
 description = 'Challenges 1 and 19 of Advent of Code 2024'
 authors = [
     {name = 'Cam Ratchford', email = 'camratchford@gmail.com'},

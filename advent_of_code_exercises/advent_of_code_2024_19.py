@@ -62,6 +62,7 @@ def render_towel(sub_pattern: str):
 
     return towel
 
+
 def draw_towels():
     exercise_data_file = Path(__file__).parent / "2024_19_input.txt"
     exercise_valid_patterns, exercise_wanted_patterns = load_example_data(exercise_data_file)

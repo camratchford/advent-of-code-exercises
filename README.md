@@ -36,6 +36,6 @@ pip install .
 day1
 # Displays how many valid patterns exist in the list of suggested towel stripe patterns
 day19
-# Draws all valid suggested towel stripe patterns. They look awful.
+# Draws all valid suggested towel stripe pattern. They look awful.
 draw-towels
 ```
