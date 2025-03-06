@@ -1,10 +1,8 @@
-import logging
 
 from time import perf_counter_ns
 from typing import Callable
 from pathlib import Path
 from re import split
-from itertools import pairwise
 
 from advent_of_code_exercises.colors import Colors
 
