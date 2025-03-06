@@ -5,11 +5,11 @@ from typing import Callable
 from pathlib import Path
 from re import split
 
-logger = logging.getLogger(__name__)
+from advent_of_code_exercises.colors import Colors
 
 
-ListCompareFuncType = Callable[[list[int], list[int]], int]
 ZippedList = list[tuple[int, int]]
+ListCompareFuncType = Callable[[ZippedList], int]
 
 timed_results = {}
 
@@ -80,20 +80,35 @@ def main_but_a_list_comp(unsorted_zip: ZippedList) -> int:
     ])
 
 
-def run_example_1():
-    logging.basicConfig(level=logging.INFO)
-    example_file = Path(__file__).parent / "2024_1_input.txt"
+def run_exercise_1():
+
+
+    # Test if the theory works
+    example_file = Path(__file__).parent / "2024_1_example.txt"
     example_data_set = load_example_data(example_file)
+    assert main_but_using_map(example_data_set) == 11
+    assert main_but_a_list_comp(example_data_set) == 11
+    assert main_but_a_list_comp(example_data_set) == 11
 
+    # Run the exercise
+    exercise_file = Path(__file__).parent / "2024_1_input.txt"
+    exercise_data_set = load_example_data(exercise_file)
+    result = 0
     for i in range(1000):
-        res_1 = main(example_data_set)
-        res_2 = main_but_using_map(example_data_set)
-        res_3 = main_but_a_list_comp(example_data_set)
+        res_1 = main(exercise_data_set)
+        res_2 = main_but_using_map(exercise_data_set)
+        res_3 = main_but_a_list_comp(exercise_data_set)
         assert res_1 == res_2 == res_3
+        result = res_1
 
+    print(f"{Colors.LIGHT_WHITE}Result is {Colors.GREEN}{result}{Colors.END}")
     for func_name, time_list in timed_results.items():
-        logger.info(f"{func_name} has an average run time of {sum(time_list) // 1000} milliseconds.")
+        print(
+            f"{Colors.CYAN}{func_name}{Colors.LIGHT_WHITE} has an average run time of "
+            f"{Colors.GREEN}{sum(time_list) // 1000}{Colors.LIGHT_WHITE} milliseconds."
+            f"{Colors.END}"
+        )
 
 
 if __name__ == "__main__":
-    run_example_1()
+    run_exercise_1()
