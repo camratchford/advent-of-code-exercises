@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["advent_of_code_exercises"]
+
+[project]
+name = 'advent_of_code_exercises'
+description = 'Challenges 1 and 19 of Advent of Code 2024'
+authors = [
+    {name = 'Cam Ratchford', email = 'camratchford@gmail.com'},
+]
+
+version = "0.0.1"
+requires-python = '>=3.7'
+
+
+[project.scripts]
+day1_timed_main = "advent_of_code_exercises.advent_of_code_2024_1:run_example_1"
