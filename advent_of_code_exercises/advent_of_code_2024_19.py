@@ -1,9 +1,8 @@
-
-import logging
 from pathlib import Path
 from re import compile, Pattern
+from itertools import combinations_with_replacement
+
 from advent_of_code_exercises.colors import Colors
-from itertools import chain
 
 
 def load_example_data(file: Path):
@@ -35,7 +34,7 @@ def count_valid_patterns(valid_pattern_list, wanted_pattern_list):
     return len([i for i in wanted_pattern_list if is_valid_pattern(compiled_regex, i)])
 
 
-def get_valid_patterns(valid_pattern_list, wanted_pattern_list):
+def get_valid_designs(valid_pattern_list, wanted_pattern_list):
     compiled_regex = generate_regex(valid_pattern_list)
     return [i for i in wanted_pattern_list if is_valid_pattern(compiled_regex, i)]
 
@@ -45,6 +44,40 @@ def split_by_subpattern(valid_pattern_list, pattern):
     matches = [i for i in compiled_regex.findall(pattern) if i != '']
 
     return matches
+
+
+def try_n_combination(subpattern_list, match_pattern, n):
+
+    for combination in combinations_with_replacement(subpattern_list, n):
+        if combination:
+            attempted_match = "".join(list(combination))
+            if attempted_match == match_pattern:
+                yield list(combination)
+
+
+def try_combinations(subpattern_list, match_pattern):
+    results = []
+    for i in range(2, len(subpattern_list)+1):
+        output = []
+        for c in try_n_combination(subpattern_list, match_pattern, i):
+            output.append(c)
+
+        for another_list in output:
+            if len(another_list):
+                results.extend(another_list)
+    return output
+
+
+
+def test_towel_permutations(valid_pattern_list, valid_designs):
+    valid_combination = []
+    for design in valid_designs:
+        subpatterns_found = split_by_subpattern(valid_pattern_list, design)
+        if len(subpatterns_found):
+            found = try_combinations(subpatterns_found, design)
+            if found is not None:
+                valid_combination.append(list(found))
+    return len([i for i in valid_combination if i])
 
 
 def render_towel(sub_pattern: str):
@@ -66,7 +99,7 @@ def render_towel(sub_pattern: str):
 def draw_towels():
     exercise_data_file = Path(__file__).parent / "2024_19_input.txt"
     exercise_valid_patterns, exercise_wanted_patterns = load_example_data(exercise_data_file)
-    patterns = get_valid_patterns(exercise_valid_patterns, exercise_wanted_patterns)
+    patterns = get_valid_designs(exercise_valid_patterns, exercise_wanted_patterns)
     for pattern in patterns:
         towel_stack = ""
         for sub_pattern in split_by_subpattern(exercise_valid_patterns, pattern):
@@ -81,12 +114,13 @@ def run_exercise_19():
 
     example_data_file = Path(__file__).parent / "2024_19_example.txt"
     example_valid_patterns, example_wanted_patterns = load_example_data(example_data_file)
-    example_result = count_valid_patterns(example_valid_patterns, example_wanted_patterns)
+    example_result = test_towel_permutations(example_valid_patterns, example_wanted_patterns)
     assert example_result == 6
 
     exercise_data_file = Path(__file__).parent / "2024_19_input.txt"
     exercise_valid_patterns, exercise_wanted_patterns = load_example_data(exercise_data_file)
-    exercise_result = count_valid_patterns(exercise_valid_patterns, exercise_wanted_patterns)
+    valid_designs = get_valid_designs(exercise_valid_patterns, exercise_wanted_patterns)
+    exercise_result = test_towel_permutations(exercise_valid_patterns, valid_designs)
 
     print(f"{Colors.LIGHT_WHITE}Result is {Colors.GREEN}{exercise_result}{Colors.END}")
 
