@@ -14,10 +14,10 @@ timed_results = {}
 
 
 def measure_runtime(compare_func: ListCompareFuncType):
-    def wrapper(unzipped_list: ZippedList) -> int:
+    def wrapper(*args, **kwargs) -> int:
 
         before = perf_counter_ns()
-        result = compare_func(unzipped_list)
+        result = compare_func(*args, **kwargs)
         timed = perf_counter_ns() - before
 
         if not timed_results.get(compare_func.__name__):
@@ -33,9 +33,10 @@ def split_by_space(string: str):
     return tuple(int(i) for i in split(r"\s+", string))
 
 
-def load_example_data(file: Path) -> str:
+def load_example_data(file: Path) -> list[tuple[int, ...]]:
     example_data = file.read_text().splitlines()
     return list(map(split_by_space, example_data))
+
 
 def load_example_data_split(file: Path):
     example_data = file.read_text().splitlines()
@@ -48,7 +49,6 @@ def load_example_data_split(file: Path):
     return list_a, list_b
 
 
-
 def sort_zip(unsorted_zip: ZippedList) -> (list[int], list[int]):
     """
     I didn't experiment with this one, but I'm sure there's a faster way
@@ -58,8 +58,7 @@ def sort_zip(unsorted_zip: ZippedList) -> (list[int], list[int]):
     return zip(sorted_a, sorted_b)
 
 
-
-def count_occurences(a, list_b):
+def count_occurrences(a, list_b):
     i = 0
     for b in list_b:
         if a == b:
@@ -67,19 +66,26 @@ def count_occurences(a, list_b):
     return i
 
 
+@measure_runtime
 def part_2(list_a: list[int], list_b: list[int]):
     tally = []
     for a in list_a:
-        tally.append(a * count_occurences(a, list_b))
+        tally.append(a * count_occurrences(a, list_b))
     return sum(tally)
 
 
+@measure_runtime
 def part_2_with_sorted_lists(list_a: list[int], list_b: list[int]):
     tally = []
     sorted_a = sorted(list_a)
     sorted_b = sorted(list_b)
     for a in sorted_a:
-        tally.append(a * count_occurences(a, sorted_b))
+        try:
+            index = sorted_b.index(a)
+        except ValueError:
+            continue
+        list_b_slice = sorted_b[index:]
+        tally.append(a * count_occurrences(a, list_b_slice))
     return sum(tally)
 
 
@@ -134,6 +140,15 @@ def run_exercise_1():
         result = res_1
 
     print(f"{Colors.LIGHT_WHITE}Pert 1 Result is {Colors.GREEN}{result}{Colors.END}")
+
+    list_a, list_b = load_example_data_split(exercise_file)
+    part_2_result = part_2(list_a, list_b)
+    part_2_result_again = part_2_with_sorted_lists(list_a, list_b)
+    assert part_2_result == part_2_result_again
+
+    print()
+    print(f"{Colors.LIGHT_WHITE}Part 2 result is {Colors.GREEN}{part_2_result}{Colors.END}")
+    print()
     for func_name, time_list in timed_results.items():
         print(
             f"{Colors.CYAN}{func_name}{Colors.LIGHT_WHITE} has an average run time of "
@@ -141,14 +156,6 @@ def run_exercise_1():
             f"{Colors.END}"
         )
 
-    list_a, list_b = load_example_data_split(exercise_file)
-    part_2_result = part_2(list_a, list_b)
-    part_2_result_again = part_2_with_sorted_lists(list_a, list_b)
-    assert part_2_result == part_2_result_again
-    print()
-    print(f"{Colors.LIGHT_WHITE}Part 2 result is {Colors.GREEN}{part_2_result}{Colors.END}")
-
 
 if __name__ == "__main__":
-
     run_exercise_1()
