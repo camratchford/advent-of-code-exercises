@@ -1,14 +1,13 @@
 from pathlib import Path
 from re import compile, Pattern
-from itertools import combinations_with_replacement
+from itertools import combinations_with_replacement, filterfalse
+from bisect import bisect_right
 
 from advent_of_code_exercises.colors import Colors
 
 
 def load_example_data(file: Path):
     wanted_pattern_list = file.read_text().splitlines()
-    # Uncertain if sorting from largest to smallest is *all* I have to do
-    # I feel that there's more required more edge cases
     valid_pattern_list = sorted(
         wanted_pattern_list.pop(0).split(", "),
         key=len,
@@ -41,43 +40,40 @@ def get_valid_designs(valid_pattern_list, wanted_pattern_list):
 
 def split_by_subpattern(valid_pattern_list, pattern):
     compiled_regex = compile("|".join([fr"{i}" for i in valid_pattern_list]))
-    matches = [i for i in compiled_regex.findall(pattern) if i != '']
-
+    matches = [i for i in compiled_regex.findall(pattern) if i != '' and i != pattern]
     return matches
 
 
-def try_n_combination(subpattern_list, match_pattern, n):
-
-    for combination in combinations_with_replacement(subpattern_list, n):
-        if combination:
-            attempted_match = "".join(list(combination))
-            if attempted_match == match_pattern:
-                yield list(combination)
-
 
 def try_combinations(subpattern_list, match_pattern):
-    results = []
-    for i in range(2, len(subpattern_list)+1):
-        output = []
-        for c in try_n_combination(subpattern_list, match_pattern, i):
-            output.append(c)
+    subpattern_list = sorted(subpattern_list, key=len, reverse=True)
+    meta_patterns = [sub for sub in subpattern_list if len(sub) >= 2]
+    single_patterns = ['w', 'u', 'b', 'r', 'g']
+    meta_substitutions = {k: [] for k in meta_patterns}
+    for meta in meta_patterns:
+        list_slice = bisect_right(meta_patterns, meta)
+        meta_substitutions[meta] = split_by_subpattern(meta_patterns[list_slice:], meta)
 
-        for another_list in output:
-            if len(another_list):
-                results.extend(another_list)
-    return output
+    combination_count = 0
+    for s in meta_patterns:
+
+        combination_count += 1      # The meta pattern
+        combination_count += len(s) # The single-letter patterns
+        if s in meta_substitutions.keys():
+            combination_count += len(meta_substitutions[s]) # Every sub-pattern substitution of meta
+
+    return combination_count
 
 
 
 def test_towel_permutations(valid_pattern_list, valid_designs):
-    valid_combination = []
+    valid_combination = 0
     for design in valid_designs:
         subpatterns_found = split_by_subpattern(valid_pattern_list, design)
         if len(subpatterns_found):
             found = try_combinations(subpatterns_found, design)
-            if found is not None:
-                valid_combination.append(list(found))
-    return len([i for i in valid_combination if i])
+            valid_combination += found
+    return valid_combination
 
 
 def render_towel(sub_pattern: str):
@@ -115,14 +111,14 @@ def run_exercise_19():
     example_data_file = Path(__file__).parent / "2024_19_example.txt"
     example_valid_patterns, example_wanted_patterns = load_example_data(example_data_file)
     example_result = test_towel_permutations(example_valid_patterns, example_wanted_patterns)
-    assert example_result == 6
+    print(example_result)
 
-    exercise_data_file = Path(__file__).parent / "2024_19_input.txt"
-    exercise_valid_patterns, exercise_wanted_patterns = load_example_data(exercise_data_file)
-    valid_designs = get_valid_designs(exercise_valid_patterns, exercise_wanted_patterns)
-    exercise_result = test_towel_permutations(exercise_valid_patterns, valid_designs)
-
-    print(f"{Colors.LIGHT_WHITE}Result is {Colors.GREEN}{exercise_result}{Colors.END}")
+    # exercise_data_file = Path(__file__).parent / "2024_19_input.txt"
+    # exercise_valid_patterns, exercise_wanted_patterns = load_example_data(exercise_data_file)
+    # valid_designs = get_valid_designs(exercise_valid_patterns, exercise_wanted_patterns)
+    # exercise_result = test_towel_permutations(exercise_valid_patterns, valid_designs)
+    #
+    # print(f"{Colors.LIGHT_WHITE}Result is {Colors.GREEN}{exercise_result}{Colors.END}")
 
 
 if __name__ == "__main__":

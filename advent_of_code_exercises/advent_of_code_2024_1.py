@@ -3,6 +3,7 @@ from time import perf_counter_ns
 from typing import Callable
 from pathlib import Path
 from re import split
+from bisect import bisect_left, bisect_right
 
 from advent_of_code_exercises.colors import Colors
 
@@ -90,6 +91,34 @@ def part_2_with_sorted_lists(list_a: list[int], list_b: list[int]):
 
 
 @measure_runtime
+def part_2_with_bisect_left(list_a: list[int], list_b: list[int]):
+    tally = []
+    sorted_a = sorted(list_a)
+    sorted_b = sorted(list_b)
+    for a in sorted_a:
+        list_b_slice_begin = bisect_left(sorted_b, a)
+        list_b_slice_end = bisect_right(sorted_b, a)
+        tally.append(a * (list_b_slice_end - list_b_slice_begin))
+    return sum(tally)
+
+
+@measure_runtime
+def part_2_with_dict(list_a: list[int], list_b: list[int]):
+    results = 0
+    tally_dict = {}
+
+    for b in list_b:
+        if not tally_dict.get(b):
+            tally_dict[b] = 0
+        tally_dict[b] = tally_dict[b] + 1
+
+    for a in list_a:
+        if tally_dict.get(a):
+            results += a * tally_dict.get(a)
+    return results
+
+
+@measure_runtime
 def part_1(unsorted_zip: ZippedList) -> int:
     diff = 0
     for a, b in sort_zip(unsorted_zip):
@@ -142,9 +171,13 @@ def run_exercise_1():
     print(f"{Colors.LIGHT_WHITE}Pert 1 Result is {Colors.GREEN}{result}{Colors.END}")
 
     list_a, list_b = load_example_data_split(exercise_file)
-    part_2_result = part_2(list_a, list_b)
-    part_2_result_again = part_2_with_sorted_lists(list_a, list_b)
-    assert part_2_result == part_2_result_again
+
+    for i in range(1000):
+        part_2_result = part_2(list_a, list_b)
+        part_2_sorted_result = part_2_with_sorted_lists(list_a, list_b)
+        part_2_with_bisect_left_result = part_2_with_bisect_left(list_a, list_b)
+        part_2_dict_result = part_2_with_dict(list_a, list_b)
+        assert part_2_result == part_2_sorted_result == part_2_with_bisect_left_result == part_2_dict_result
 
     print()
     print(f"{Colors.LIGHT_WHITE}Part 2 result is {Colors.GREEN}{part_2_result}{Colors.END}")
