@@ -9,21 +9,20 @@ from advent_of_code_exercises.colors import Colors
 
 
 ZippedList = list[tuple[int, int]]
-ListCompareFuncType = Callable[[ZippedList], int]
 
 timed_results = {}
 
 
-def measure_runtime(compare_func: ListCompareFuncType):
+def measure_runtime(func):
     def wrapper(*args, **kwargs) -> int:
 
         before = perf_counter_ns()
-        result = compare_func(*args, **kwargs)
+        result = func(*args, **kwargs)
         timed = perf_counter_ns() - before
 
-        if not timed_results.get(compare_func.__name__):
-            timed_results[compare_func.__name__] = []
-        timed_results[compare_func.__name__].append(timed)
+        if not timed_results.get(func.__name__):
+            timed_results[func.__name__] = []
+        timed_results[func.__name__].append(timed)
 
         return result
 
@@ -59,7 +58,7 @@ def sort_zip(unsorted_zip: ZippedList) -> (list[int], list[int]):
     return zip(sorted_a, sorted_b)
 
 
-def count_occurrences(a, list_b):
+def count_occurrences(a: int, list_b: list[int]):
     i = 0
     for b in list_b:
         if a == b:
@@ -185,7 +184,7 @@ def run_exercise_1():
     for func_name, time_list in timed_results.items():
         print(
             f"{Colors.CYAN}{func_name}{Colors.LIGHT_WHITE} has an average run time of "
-            f"{Colors.GREEN}{sum(time_list) // 1000}{Colors.LIGHT_WHITE} milliseconds."
+            f"{Colors.GREEN}{sum(time_list) // len(time_list)}{Colors.LIGHT_WHITE} milliseconds."
             f"{Colors.END}"
         )
 

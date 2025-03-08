@@ -65,7 +65,6 @@ def try_combinations(subpattern_list, match_pattern):
     return combination_count
 
 
-
 def test_towel_permutations(valid_pattern_list, valid_designs):
     valid_combination = 0
     for design in valid_designs:
